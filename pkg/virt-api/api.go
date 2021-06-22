@@ -78,8 +78,9 @@ const (
 	defaultHandlerCertFilePath = "/etc/virt-handler/clientcertificates/tls.crt"
 	defaultHandlerKeyFilePath  = "/etc/virt-handler/clientcertificates/tls.key"
 
-	httpStatusNotFoundMessage   = "Not Found"
-	httpStatusBadRequestMessage = "Bad Request"
+	httpStatusNotFoundMessage     = "Not Found"
+	httpStatusBadRequestMessage   = "Bad Request"
+	httpStatusInternalServerError = "Internal Server Error"
 )
 
 type VirtApi interface {
@@ -245,6 +246,22 @@ func (app *virtAPIApp) composeSubresources() {
 		stopRouteBuilder.ParameterNamed("body").Required(false)
 		subws.Route(stopRouteBuilder)
 
+		subws.Route(subws.PUT(rest.ResourcePath(subresourcesvmiGVR)+rest.SubResourcePath("freeze")).
+			To(subresourceApp.FreezeVMIRequestHandler).
+			Param(rest.NamespaceParam(subws)).Param(rest.NameParam(subws)).
+			Operation(version.Version+"Freeze").
+			Doc("Freeze a VirtualMachineInstance object.").
+			Returns(http.StatusOK, "OK", "").
+			Returns(http.StatusInternalServerError, httpStatusInternalServerError, ""))
+
+		subws.Route(subws.PUT(rest.ResourcePath(subresourcesvmiGVR)+rest.SubResourcePath("unfreeze")).
+			To(subresourceApp.UnfreezeVMIRequestHandler).
+			Param(rest.NamespaceParam(subws)).Param(rest.NameParam(subws)).
+			Operation(version.Version+"Unfreeze").
+			Doc("Unfreeze a VirtualMachineInstance object.").
+			Returns(http.StatusOK, "OK", "").
+			Returns(http.StatusInternalServerError, httpStatusInternalServerError, ""))
+
 		subws.Route(subws.PUT(rest.ResourcePath(subresourcesvmiGVR)+rest.SubResourcePath("pause")).
 			To(subresourceApp.PauseVMIRequestHandler).
 			Param(rest.NamespaceParam(subws)).Param(rest.NameParam(subws)).
@@ -386,6 +403,14 @@ func (app *virtAPIApp) composeSubresources() {
 					},
 					{
 						Name:       "virtualmachineinstances/unpause",
+						Namespaced: true,
+					},
+					{
+						Name:       "virtualmachineinstances/freeze",
+						Namespaced: true,
+					},
+					{
+						Name:       "virtualmachineinstances/unfreeze",
 						Namespaced: true,
 					},
 					{
