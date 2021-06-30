@@ -81,7 +81,7 @@ const (
 
 	ephemeralDiskDir = virtShareDir + "-ephemeral-disks"
 
-	defaultControllerThreads    = 3
+	defaultControllerThreads    = 6
 	defaultVMIControllerThreads = 10
 
 	defaultLauncherSubGid                 = 107
